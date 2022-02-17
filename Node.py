@@ -133,7 +133,7 @@ class Node:
         # Problem statement 3.a
         # Finds all vnodes mapped to this node and shuffles them
         # Implement this logic and store in local_vnode_list
-
+        local_vnode_list = self._vnode_map.get_vnodes_for_node(self.name)
         # Prepares to select proportional vnodes and their corresponding keys to transfer
         transfer_slice = round(len(local_vnode_list) / len(self._node_dict))
         local_vnode_slice = local_vnode_list[0:transfer_slice]
@@ -150,6 +150,21 @@ class Node:
         #               ...
         #                }
         # Here 23 and 96 are examples of vnode ids
+
+        # prepare the dict of vnode and list of user keys to move
+        users_keys_to_move_for_vnode = {}
+        for key in self._data_store.keys():
+            expected_vnode = key % self._TOTAL_VIRTUAL_NODES
+            if(expected_vnode in local_vnode_slice):
+                users_keys_to_move_for_vnode.setdefault(
+                    expected_vnode, []).append(key)
+
+        # use the above users_keys with vnode as the key to prepare the transfer_dict
+        for vnode in users_keys_to_move_for_vnode.keys():
+            transfer_dict[vnode] = {
+                'target_node': new_node_name,
+                'keys': users_keys_to_move_for_vnode[vnode]
+            }
 
         # Transfer the remapped keys to the new node
         self.transfer_keys(transfer_dict)

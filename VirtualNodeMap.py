@@ -12,6 +12,7 @@ class VirtualNodeMap:
         self._vnode_map = {}
         self._node_names = node_names
         self._TOTAL_VIRTUAL_NODES = TOTAL_VIRTUAL_NODES
+        self._node_vnode_map = {}
 
     @property
     def vnode_map(self):
@@ -40,7 +41,7 @@ class VirtualNodeMap:
         print("self._TOTAL_VIRTUAL_NODES ", self._TOTAL_VIRTUAL_NODES)
         print("# of nodes = ", len(self._node_names))
 
-        self.print_vnNodes_allocated_each_node()
+        self.prepare_node_to_vnNodes_lookup()
 
     # Return the vnode name mapped to a particular vnode
 
@@ -58,13 +59,12 @@ class VirtualNodeMap:
     def set_new_assigned_node(self, vnode, new_node_name):
         self._vnode_map[vnode] = new_node_name
 
-    def print_vnNodes_allocated_each_node(self):
-        node_vnode_map = {}
+    def prepare_node_to_vnNodes_lookup(self):
 
         for key, value in self._vnode_map.items():
-            node_vnode_map.setdefault(value, []).append(key)
+            self._node_vnode_map.setdefault(value, []).append(key)
 
-        for key, value in node_vnode_map.items():
+        for key, value in self._node_vnode_map.items():
             print(key, " # of vnodes ", len(value))
 
         # for key, value in node_vnode_map.items():
@@ -119,3 +119,6 @@ class VirtualNodeMap:
 
         selectedNodes.append(random_node)
         return random_node
+
+    def get_vnodes_for_node(self, node_name):
+        return self._node_vnode_map[node_name]
