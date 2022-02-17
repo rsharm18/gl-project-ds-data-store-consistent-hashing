@@ -134,6 +134,7 @@ class Node:
         # Finds all vnodes mapped to this node and shuffles them
         # Implement this logic and store in local_vnode_list
         local_vnode_list = self._vnode_map.get_vnodes_for_node(self.name)
+        random.shuffle(local_vnode_list)
         # Prepares to select proportional vnodes and their corresponding keys to transfer
         transfer_slice = round(len(local_vnode_list) / len(self._node_dict))
         local_vnode_slice = local_vnode_list[0:transfer_slice]

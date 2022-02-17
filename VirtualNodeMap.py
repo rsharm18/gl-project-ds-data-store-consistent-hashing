@@ -120,5 +120,5 @@ class VirtualNodeMap:
         selectedNodes.append(random_node)
         return random_node
 
-    def get_vnodes_for_node(self, node_name):
+    def get_vnodes_for_node(self, node_name) -> List:
         return self._node_vnode_map[node_name]
