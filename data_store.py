@@ -19,7 +19,8 @@ node_dict = {}
 print('###############  INITIAL CONFIGURATION ###############\n')
 
 # Generates random node names for the initial default nodes
-node_names = [InfoGenerator.generate_node_name(RANDOM_STRING_LENGTH) for i in range(DEFAULT_NUM_NODES)]
+node_names = [InfoGenerator.generate_node_name(
+    RANDOM_STRING_LENGTH) for i in range(DEFAULT_NUM_NODES)]
 
 # Creates the first node and initializes the vnode mapping
 # Also keeps a copy of the vnode map instance in the client for later use
@@ -32,7 +33,8 @@ vnode_map = first_node.clone_vnode_map()
 # Creates other nodes, intializing them with the same vnode mapping
 # Also updates the complete node mapping in all nodes
 for i in range(1, len(node_names)):
-    node_dict[node_names[i]] = Node(node_names[i], TOTAL_VIRTUAL_NODES, first_node.clone_vnode_map())
+    node_dict[node_names[i]] = Node(
+        node_names[i], TOTAL_VIRTUAL_NODES, first_node.clone_vnode_map())
 
 for name in node_names:
     node_dict[name].populate_nodes(node_dict)
@@ -41,13 +43,13 @@ for name in node_names:
 # Populates the distributed data store
 for i in range(INITIAL_NUM_KEYS):
     user_info = UserInfo(InfoGenerator.generate_user_id(),
-                             UserData(InfoGenerator.generate_email(RANDOM_STRING_LENGTH),
-                                        InfoGenerator.generate_password(PASSWORD_LENGTH)))
+                         UserData(InfoGenerator.generate_email(RANDOM_STRING_LENGTH),
+                                  InfoGenerator.generate_password(PASSWORD_LENGTH)))
 
     # Finds the right node and adds data to it
     # In the final solution, this is not necessary as sending data
     # to any node will internally set it on the appropriate node
-    # We are explicitly sending to the owner node here since you still have 
+    # We are explicitly sending to the owner node here since you still have
     # to implement get_data and set_data in Node to be masterless
     node_name = vnode_map.get_assigned_node(user_info.user_id)
     node_dict[node_name].set_data(user_info.user_id, user_info.user_data)
@@ -71,7 +73,8 @@ new_node_name = InfoGenerator.generate_node_name(RANDOM_STRING_LENGTH)
 node_names.append(new_node_name)
 
 # New node creation similar to the other existing nodes
-new_node = Node(new_node_name, TOTAL_VIRTUAL_NODES, first_node.clone_vnode_map())
+new_node = Node(new_node_name, TOTAL_VIRTUAL_NODES,
+                first_node.clone_vnode_map())
 node_dict[new_node_name] = new_node
 new_node.populate_nodes(node_dict)
 
@@ -125,8 +128,8 @@ print('\n\n')
 
 # Test read/write on a new key
 user_info = UserInfo(InfoGenerator.generate_user_id(),
-                             UserData(InfoGenerator.generate_email(RANDOM_STRING_LENGTH),
-                                        InfoGenerator.generate_password(PASSWORD_LENGTH)))
+                     UserData(InfoGenerator.generate_email(RANDOM_STRING_LENGTH),
+                              InfoGenerator.generate_password(PASSWORD_LENGTH)))
 
 print(f'Generated user data: {user_info.user_data}')
 any_node.set_data(user_info.user_id, user_info.user_data)
