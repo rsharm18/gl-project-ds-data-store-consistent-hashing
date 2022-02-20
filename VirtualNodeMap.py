@@ -1,7 +1,6 @@
 import math
 import random
 from tokenize import String
-from typing import List
 
 
 # Stores the vnode to node mapping
@@ -32,7 +31,8 @@ class VirtualNodeMap:
         # pass
 
         self.distribute_vnodes_to_nodes()
-        print('VirtualNodeMap.populate_map :: \n \t# of vnodes : {} \n \tvnode_map : {} \n'.format(len(self.vnode_map.keys()),self.vnode_map))
+        print('VirtualNodeMap.populate_map :: \n \t# of vnodes : {} \n \tvnode_map : {} \n'.format(
+            len(self.vnode_map.keys()), self.vnode_map))
 
     # Return the vnode name mapped to a particular vnode
 
@@ -49,7 +49,9 @@ class VirtualNodeMap:
     # This is useful when vnodes are remapped during node addition or removal
     def set_new_assigned_node(self, vnode, new_node_name):
         self._vnode_map[vnode] = new_node_name
-        print('VirtualNodeMap.set_new_assigned_node for node= {} :: \n \t # of vnodes : {} \n \tvnode_map : {} \n'.format(new_node_name,len(self.vnode_map.keys()),self.vnode_map))
+        print(
+            'VirtualNodeMap.set_new_assigned_node for node= {} :: \n \t # of vnodes : {} \n \tvnode_map : {} \n'.format(
+                new_node_name, len(self.vnode_map.keys()), self.vnode_map))
 
     def distribute_vnodes_to_nodes(self) -> int:
 
@@ -84,12 +86,13 @@ class VirtualNodeMap:
                 self._vnode_map[allocated_vnode_count] = self.select_random_node(random_nodes)
                 allocated_vnode_count += 1
 
-        print('TOTAL_VIRTUAL_NODES = {} and # of allocated nodes= {}'.format(self._TOTAL_VIRTUAL_NODES,allocated_vnode_count))
+        print('TOTAL_VIRTUAL_NODES = {} and # of allocated nodes= {}'.format(self._TOTAL_VIRTUAL_NODES,
+                                                                             allocated_vnode_count))
 
         print('\n###### END : vnode distribution \n\n')
         return allocated_vnode_count
 
-    def select_random_node(self, selectedNodes: List) -> String:
+    def select_random_node(self, selectedNodes: list) -> String:
         random_node = random.choice(self._node_names)
 
         if (random_node in selectedNodes):

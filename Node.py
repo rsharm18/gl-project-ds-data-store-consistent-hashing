@@ -12,9 +12,10 @@ class Node:
         self._data_store = {}
         self._vnode_map: VirtualNodeMap = vnode_map
         self._TOTAL_VIRTUAL_NODES = TOTAL_VIRTUAL_NODES
-        self._cache_node_vnode_mapping = {}
+        self._node_vnode_mapping_cache = {}
         self._debug = debug
         if vnode_map is not None:
+            # refresh the local node to vnode cache
             self.refresh_node_to_vnodes_mapping_cache()
 
     def __str__(self):
@@ -51,7 +52,7 @@ class Node:
         target_node: Node = self.__get_target_node_for_key__(key)
         self.__print_to_console__(
             '\n Node.get_data :: Data does not exist in local {} calling remote node :  {} which has the data for the key= {} \n'.format(
-                self.name,target_node.name, key))
+                self.name, target_node.name, key))
         return target_node.get_data(key)
 
     # For a masterless data save/update, any key update can be sent to any Node
@@ -104,11 +105,13 @@ class Node:
     def initialize_vnode_map(self, node_names):
         self._vnode_map = VirtualNodeMap(node_names, self._TOTAL_VIRTUAL_NODES)
         self._vnode_map.populate_map()
+        # refresh the local node to vnode cache
         self.refresh_node_to_vnodes_mapping_cache()
 
     # This changes the mapping of a particular vnode to a new node
     def set_vnode_map_entry(self, vnode, node_name):
         self._vnode_map.set_new_assigned_node(vnode, node_name)
+        # refresh the local node to vnode cache
         self.refresh_node_to_vnodes_mapping_cache()
 
     # Transfers the keys to the new target node, one vnode at a time
@@ -159,13 +162,13 @@ class Node:
         # Here 23 and 96 are examples of vnode ids
 
         # prepare the dict of vnode and list of user keys to move
-        user_to_vnode_mapping_from_vnodes = self.__get_user_to_vnode_mapping_from_vnodes__(local_vnode_slice)
+        vnode_to_users_mapping = self.__get_vnode_to_users_mapping__(local_vnode_slice)
 
-        # use the above user_to_vnode_mapping_from_vnodes dict with vnode as the key to prepare the transfer_dict
-        for vnode in user_to_vnode_mapping_from_vnodes.keys():
+        # use the above vnode_to_users_mapping dict with vnode as the key to prepare the transfer_dict
+        for vnode in vnode_to_users_mapping.keys():
             transfer_dict[vnode] = {
                 'target_node': new_node_name,
-                'keys': user_to_vnode_mapping_from_vnodes[vnode]
+                'keys': vnode_to_users_mapping[vnode]
             }
 
         # Transfer the remapped keys to the new node
@@ -205,10 +208,10 @@ class Node:
         # Here 23 and 96 are examples of vnode ids
 
         # prepare the dict of vnode and list of user keys to move
-        users_keys_to_move_for_vnode = self.__get_user_to_vnode_mapping_from_vnodes__(
+        users_keys_to_move_for_vnode = self.__get_vnode_to_users_mapping__(
             skip_lookup_in_local_node_list=True)
 
-        # use the above user_to_vnode_mapping_from_vnodes dict with vnode as the key to prepare the transfer_dict
+        # use the above vnode_to_users_mapping dict with vnode as the key to prepare the transfer_dict
         for vnode in users_keys_to_move_for_vnode.keys():
             transfer_dict[vnode] = {
                 'target_node': transfer_node_mapping[vnode],
@@ -228,18 +231,18 @@ class Node:
         target_node: Node = self._node_dict[node_name]
         return target_node
 
-    def __get_user_to_vnode_mapping_from_vnodes__(self, local_vnode_list=[],
-                                                  skip_lookup_in_local_node_list=False) -> dict:
+    def __get_vnode_to_users_mapping__(self, local_vnode_list=[],
+                                      skip_lookup_in_local_node_list=False) -> dict:
         # prepare the dict of vnode and list of user keys to move
-        user_to_vnode_mapping = {}
+        vnode_to_users_mapping = {}
         for user_key in self._data_store.keys():
             # get the assigned the node for the given key
             assigned_vnode = VirtualNodeMap.get_vnode_for_key(user_key, self._TOTAL_VIRTUAL_NODES)
             if skip_lookup_in_local_node_list or assigned_vnode in local_vnode_list:
-                user_to_vnode_mapping.setdefault(
+                vnode_to_users_mapping.setdefault(
                     assigned_vnode, []).append(user_key)
 
-        return user_to_vnode_mapping
+        return vnode_to_users_mapping
 
     def __get_vnodes_for_current_node__(self, shuffle_vnodes=False) -> list:
         vnode_list = self.get_vnodes_for_current_node()
@@ -248,16 +251,18 @@ class Node:
         return vnode_list
 
     def get_vnodes_for_current_node(self) -> list:
-        return self._cache_node_vnode_mapping.get(self.name, [])
+        return self._node_vnode_mapping_cache.get(self.name, [])
 
     # each node should maintain the list of vnodes assigned to it
     def refresh_node_to_vnodes_mapping_cache(self):
-        self._cache_node_vnode_mapping = {}
+        self._node_vnode_mapping_cache = {}
         for key, value in self._vnode_map.vnode_map.items():
             if value == self.name:
-                self._cache_node_vnode_mapping.setdefault(value, []).append(key)
+                self._node_vnode_mapping_cache.setdefault(value, []).append(key)
 
-        self.__print_to_console__('\n\n Node: refresh_node_to_vnodes_mapping_cache :: \n\t\tNode= {} - has {} virtual nodes. \n\tvnodes mapping {} \n\n'.format(self.name, len(self._cache_node_vnode_mapping.get(self.name, [])) ,self._cache_node_vnode_mapping))
+        self.__print_to_console__(
+            '\n\n Node: refresh_node_to_vnodes_mapping_cache :: \n\t\tNode= {} - has {} virtual nodes. \n\tvnodes mapping {} \n\n'.format(
+                self.name, len(self._node_vnode_mapping_cache.get(self.name, [])), self._node_vnode_mapping_cache))
 
     def __print_to_console__(self, msg=''):
         if self._debug:
