@@ -6,7 +6,7 @@ from VirtualNodeMap import VirtualNodeMap
 
 
 class Node:
-    def __init__(self, name, TOTAL_VIRTUAL_NODES, vnode_map=None, debug=False):
+    def __init__(self, name, TOTAL_VIRTUAL_NODES, vnode_map=None, debug=True):
         self._name = name
         self._node_dict = {}
         self._data_store = {}
@@ -14,6 +14,8 @@ class Node:
         self._TOTAL_VIRTUAL_NODES = TOTAL_VIRTUAL_NODES
         self._cache_node_vnode_mapping = {}
         self._debug = debug
+        if vnode_map is not None:
+            self.refresh_node_to_vnodes_mapping_cache()
 
     def __str__(self):
         return f'Node: {self.name}, Number of Stored Keys: {len(self._data_store)}'
@@ -48,8 +50,8 @@ class Node:
         # fetch the data from remote node
         target_node: Node = self.__get_target_node_for_key__(key)
         self.__print_to_console__(
-            '\n get_data :: Data does not exist in local. => remote node :  {} has the data for the key= {}'.format(
-                target_node.name, key))
+            '\n Node.get_data :: Data does not exist in local {} calling remote node :  {} which has the data for the key= {} \n'.format(
+                self.name,target_node.name, key))
         return target_node.get_data(key)
 
     # For a masterless data save/update, any key update can be sent to any Node
@@ -246,7 +248,7 @@ class Node:
         return vnode_list
 
     def get_vnodes_for_current_node(self) -> list:
-        return self._cache_node_vnode_mapping[self.name]
+        return self._cache_node_vnode_mapping.get(self.name, [])
 
     # each node should maintain the list of vnodes assigned to it
     def refresh_node_to_vnodes_mapping_cache(self):
@@ -255,7 +257,7 @@ class Node:
             if value == self.name:
                 self._cache_node_vnode_mapping.setdefault(value, []).append(key)
 
-        # print('\n\n ******** Node Name {} - node->vnode mapping {} \n\n'.format(self.name, self._cache_node_vnode_mapping))
+        self.__print_to_console__('\n\n Node: refresh_node_to_vnodes_mapping_cache :: \n\t\tNode= {} - has {} virtual nodes. \n\tvnodes mapping {} \n\n'.format(self.name, len(self._cache_node_vnode_mapping.get(self.name, [])) ,self._cache_node_vnode_mapping))
 
     def __print_to_console__(self, msg=''):
         if self._debug:

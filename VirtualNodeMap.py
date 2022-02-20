@@ -32,7 +32,7 @@ class VirtualNodeMap:
         # pass
 
         self.distribute_vnodes_to_nodes()
-        # self.refresh_node_to_vnodes_mapping_cache()
+        print('VirtualNodeMap.populate_map :: \n \t# of vnodes : {} \n \tvnode_map : {} \n'.format(len(self.vnode_map.keys()),self.vnode_map))
 
     # Return the vnode name mapped to a particular vnode
 
@@ -49,7 +49,7 @@ class VirtualNodeMap:
     # This is useful when vnodes are remapped during node addition or removal
     def set_new_assigned_node(self, vnode, new_node_name):
         self._vnode_map[vnode] = new_node_name
-
+        print('VirtualNodeMap.set_new_assigned_node for node= {} :: \n \t # of vnodes : {} \n \tvnode_map : {} \n'.format(new_node_name,len(self.vnode_map.keys()),self.vnode_map))
 
     def distribute_vnodes_to_nodes(self) -> int:
 
@@ -60,8 +60,6 @@ class VirtualNodeMap:
             vNodes_to_allocate = vNodes_to_allocate - (self._TOTAL_VIRTUAL_NODES % len(self._node_names))
 
         vnodes_per_node_count = math.floor(vNodes_to_allocate / len(self._node_names))
-
-        print('# of nodes not allocated yet = {}'.format(self._TOTAL_VIRTUAL_NODES - vNodes_to_allocate))
 
         allocated_vnode_count = 0
         node_count = 0
