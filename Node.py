@@ -19,7 +19,7 @@ class Node:
             self.refresh_node_to_vnodes_mapping_cache()
 
     def __str__(self):
-        return f'Node: {self.name}, Number of Stored Keys: {len(self._data_store)}, Number of mapped vnodes : {len(self._node_vnode_mapping_cache.get(self._name))}, assigned vnodes : {self._node_vnode_mapping_cache.get(self._name)}'
+        return f'Node: {self.name}, Number of Stored Keys: {len(self._data_store)}, Number of mapped vnodes : {len(self._node_vnode_mapping_cache.get(self._name,[]))}, assigned vnodes : {self._node_vnode_mapping_cache.get(self._name,[])}'
 
     @property
     def name(self):
