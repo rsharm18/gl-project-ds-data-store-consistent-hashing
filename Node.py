@@ -19,7 +19,7 @@ class Node:
             self.refresh_node_to_vnodes_mapping_cache()
 
     def __str__(self):
-        return f'Node: {self.name}, Number of Stored Keys: {len(self._data_store)}'
+        return f'Node: {self.name}, Number of Stored Keys: {len(self._data_store)}, Number of mapped vnodes : {len(self._node_vnode_mapping_cache.get(self._name)) }, assigned vnodes : {self._node_vnode_mapping_cache.get(self._name)}'
 
     @property
     def name(self):
@@ -45,6 +45,7 @@ class Node:
         # Otherwise it should find the owner using get_assigned_node function in _vnode_map
         # and use get_data in that node to return the value
 
+        # if the key exist in the local store, then read from local store and return
         if (key in self._data_store.keys()):
             return self._data_store[key]
 
@@ -231,9 +232,12 @@ class Node:
         target_node: Node = self._node_dict[node_name]
         return target_node
 
-    def __get_vnode_to_users_mapping__(self, local_vnode_list=[],
-                                      skip_lookup_in_local_node_list=False) -> dict:
+    def __get_vnode_to_users_mapping__(self, local_vnode_list=None,
+                                       skip_lookup_in_local_node_list=False) -> dict:
         # prepare the dict of vnode and list of user keys to move
+        if local_vnode_list is None:
+            local_vnode_list = []
+
         vnode_to_users_mapping = {}
         for user_key in self._data_store.keys():
             # get the assigned the node for the given key
@@ -261,7 +265,7 @@ class Node:
                 self._node_vnode_mapping_cache.setdefault(value, []).append(key)
 
         self.__print_to_console__(
-            '\n\n Node: refresh_node_to_vnodes_mapping_cache :: \n\t\tNode= {} - has {} virtual nodes. \n\tvnodes mapping {} \n\n'.format(
+            '\nNode= {} - has {} virtual nodes. \n\t node->vnodes mapping {} \n'.format(
                 self.name, len(self._node_vnode_mapping_cache.get(self.name, [])), self._node_vnode_mapping_cache))
 
     def __print_to_console__(self, msg=''):
